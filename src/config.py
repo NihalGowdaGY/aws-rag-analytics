@@ -1,21 +1,21 @@
 import os
 
-class Settings:
-    # 1. API Credentials
-    # Dynamically reads your Gemini API token from your active terminal environment variables
-    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
-    
-    # 2. RAG Hyperparameters (Directly addresses the assignment requirements)
-    CHUNK_SIZE: int = 1000       # Slices layout text into readable paragraph blocks [cite: 458]
-    CHUNK_OVERLAP: int = 200     # Preserves vocabulary/semantic flow across sequential splits [cite: 458]
-    RETRIEVAL_K: int = 3         # Fetches the top 3 highest matching data chunks [cite: 461]
-    
-    # 3. Model Profiles
-    EMBEDDING_MODEL_NAME: str = "all-MiniLM-L6-v2"  # Free local mathematical encoding framework [cite: 459]
-    LLM_MODEL_NAME: str = "gemini-2.5-flash"        # Stable generation engine model profile [cite: 461]
-    
-    # 4. Storage Locations
-    DATABASE_URL: str = "sqlite:///./query_analytics.db"  # Dedicated SQLite storage path [cite: 465]
-    PDF_PATH: str = "data/AWS Customer Agreement.pdf"     # Core data source location [cite: 454]
+class AppSettings:
+    def __init__(self):
+        # System Runtime Authentication
+        self.gemini_api_key = os.getenv("GEMINI_API_KEY", "")
 
-settings = Settings()
+        # RAG Pipeline Hyperparameters
+        self.chunk_size = 1000       # Token window boundary for contractual sentences
+        self.chunk_overlap = 200     # Buffer to retain paragraph context across cuts
+        self.top_k_retrieval = 3     # Nearest-neighbor matching threshold count
+
+        # Infrastructure Model Targets
+        self.embedding_model = "all-MiniLM-L6-v2"  # Local text encoder mapping model
+        self.llm_model = "gemini-2.5-flash"        # Generative routing core engine model
+
+        # Data & Database Storage Path Mapping
+        self.database_url = "sqlite:///./query_analytics.db"
+        self.source_pdf_path = "data/AWS Customer Agreement.pdf"
+
+settings = AppSettings()
