@@ -33,7 +33,6 @@ class LegalRAGProcessor:
                 
         compiled_corpus = "\n".join(extracted_text_buffer).strip()
         
-        # Defensive check: Bypasses downstream computation crashes if the PDF contains zero content
         if not compiled_corpus:
             print(f"WARNING: File located at '{settings.source_pdf_path}' contains empty or unreadable string data.")
             self.segments = []
