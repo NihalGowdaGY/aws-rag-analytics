@@ -34,8 +34,11 @@ def ingest_document():
         rag_backend.generate_vector_index()
         return {"status": "success", "message": "AWS Contract parsed, embedded, and mapped safely."}
     except Exception as err:
+        import traceback
+        print("--- EXCEPTION TRACEBACK ---")
+        traceback.print_exc()
+        print("---------------------------")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(err))
-
 @app.post("/ask", response_model=QueryResponse)
 def ask_question(payload: QueryRequest, db: Session = Depends(get_db)):
     """Executes search queries across document vector indices, records system telemetry, and logs outcomes."""

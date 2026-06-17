@@ -18,8 +18,9 @@ class LegalRAGProcessor:
         self.index = None
         
         
-        self.index_file = "index.faiss"
-        self.chunks_file = "chunks.txt"
+        # Explicitly bind the storage targets to the project root directory
+        self.index_file = os.path.join(os.getcwd(), "index.faiss")
+        self.chunks_file = os.path.join(os.getcwd(), "chunks.txt")
         
         
         self.load_persisted_index()
@@ -54,12 +55,19 @@ class LegalRAGProcessor:
         dimension = matrix.shape[1]
         self.index = faiss.IndexFlatL2(dimension)
         self.index.add(matrix)
-        
-        
-        faiss.write_index(self.index, self.index_file)
-        with open(self.chunks_file, "w", encoding="utf-8") as f:
-            for chunk in self.text_chunks:
-                f.write(chunk.replace("\n", " ") + "\n")
+
+        try:
+            print(f"Target Index Path: {self.index_file}")
+            print(f"Target Chunks Path: {self.chunks_file}")
+            
+            faiss.write_index(self.index, self.index_file)
+            with open(self.chunks_file, "w", encoding="utf-8") as f:
+                for chunk in self.text_chunks:
+                    f.write(chunk.replace("\n", " ") + "\n")
+            print("SUCCESS: Both files successfully written to disk configuration paths.")
+        except Exception as file_err:
+            print(f"OS WRITE ERROR DETECTED: {str(file_err)}")
+            raise file_err
 
     def load_persisted_index(self):
         """Loads index files from storage to bypass redundant ingestion steps on startup."""
