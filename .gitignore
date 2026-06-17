@@ -5,3 +5,6 @@
 # Python compiled bytecode directories
 __pycache__/
 *.pyc
+# Local FAISS vector index caches
+*.faiss
+chunks.txt
