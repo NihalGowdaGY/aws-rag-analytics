@@ -1,2 +1,4 @@
 # Private environment variables
 .env
+# Local database files
+*.db
