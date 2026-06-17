@@ -83,7 +83,7 @@ Get a free key at [aistudio.google.com](https://aistudio.google.com).
 
 You need two terminals running simultaneously.
 
-**Terminal 1 — start the FastAPI backend:**
+**Terminal 1 - start the FastAPI backend:**
 
 ```bash
 uvicorn src.backend:app --reload
@@ -91,7 +91,7 @@ uvicorn src.backend:app --reload
 
 Backend runs at `http://localhost:8000`. You can explore the API docs at `http://localhost:8000/docs`.
 
-**Terminal 2 — start the Streamlit frontend:**
+**Terminal 2 - start the Streamlit frontend:**
 
 ```bash
 streamlit run app/frontend.py
@@ -111,7 +111,7 @@ Dashboard opens automatically at `http://localhost:8501`.
 | `POST` | `/ask` | Accepts a query, runs RAG, returns answer + source chunks + logs the interaction |
 | `GET` | `/analytics` | Returns aggregated query stats from the SQLite database |
 
-### Example — ask a question
+### Example - ask a question
 
 ```bash
 curl -X POST http://localhost:8000/ask \
