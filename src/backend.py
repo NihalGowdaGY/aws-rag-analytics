@@ -1,13 +1,30 @@
 import time
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from src.database import get_db
 from src.models import QueryLog
 from src.schemas import QueryRequest, QueryResponse, AnalyticsSummary
-from src.rag_engine import rag_backend
+from src.rag_engine import LegalRAGProcessor
 
-app = FastAPI(title="AWS Legal Contract RAG & Analytics Backend")
+
+rag_backend = None
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Safely initializes heavyweight neural architectures on server bootstrap lifespan windows."""
+    global rag_backend
+    try:
+        
+        rag_backend = LegalRAGProcessor()
+    except Exception as e:
+        import sys
+        print(f"CRITICAL SYSTEM FAULT: Could not boot RAG engine dependencies. Reason: {str(e)}")
+        sys.exit(1)
+    yield
+
+app = FastAPI(title="AWS Legal Contract RAG & Analytics Backend", lifespan=lifespan)
 
 @app.post("/ingest", status_code=status.HTTP_200_OK)
 def ingest_document():
@@ -24,11 +41,6 @@ def ask_question(payload: QueryRequest, db: Session = Depends(get_db)):
     """Executes search queries across document vector indices, records system telemetry, and logs outcomes."""
     clean_query = payload.query.strip()
     
-    
-    if not clean_query:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inquiry text cannot be blank.")
-
-    
     start_time = time.perf_counter()
     try:
         sources, generated_answer = rag_backend.execute_retrieval_query(clean_query)
@@ -36,11 +48,9 @@ def ask_question(payload: QueryRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(err))
     execution_latency = time.perf_counter() - start_time
 
-    # Checking if the RAG system used its default fallback message
     fallback_phrase = "I am sorry, but the provided documentation does not contain that information."
     was_context_found = fallback_phrase not in generated_answer
 
-    # save metrics to db
     log_entry = QueryLog(
         query_text=clean_query,
         generated_response=generated_answer,
@@ -64,7 +74,6 @@ def get_system_analytics(db: Session = Depends(get_db)):
     unanswered = db.query(func.count(QueryLog.id)).filter(QueryLog.context_found == False).scalar() or 0
     avg_latency = db.query(func.avg(QueryLog.latency_seconds)).scalar() or 0.0
 
-    # get top 5 most common user questions
     frequent_records = (
         db.query(QueryLog.query_text, func.count(QueryLog.query_text).label("count_value"))
         .group_by(QueryLog.query_text)
