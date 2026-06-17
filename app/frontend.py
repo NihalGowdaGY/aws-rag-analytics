@@ -1,20 +1,20 @@
 import streamlit as st
 import requests
 import time
+import os
 
-BACKEND_URL = "http://127.0.0.1:8000"
+
+BACKEND_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8000")
 
 st.set_page_config(page_title="AWS Contract Audit Dashboard", layout="wide")
 
 st.title(" AWS Legal Contract Analyzer & System Analytics")
 st.caption("Compliance auditing interface backed by Gemini-2.5 and local FAISS vector indexing maps.")
 
-
 col_terminal, col_telemetry = st.columns([3, 2])
 
 with col_terminal:
     st.subheader("Auditing Console")
-    
     
     if st.button(" Initialize Document Ingestion Pipeline", use_container_width=True):
         with st.spinner("Processing PDF chunks and initializing FAISS matrices..."):
@@ -29,7 +29,6 @@ with col_terminal:
 
     st.markdown("---")
     
-    # Direct Query Interface
     user_query = st.text_input("Submit Inquiry Targeting AWS Legal Document Constraints:", placeholder="e.g., What interest rate does AWS charge on late payments?")
     
     if st.button(" Execute Contract Retrieval Search", type="primary"):
@@ -47,7 +46,7 @@ with col_terminal:
                         st.info(data["answer"])
                         st.markdown(f" **Pipeline Runtime Latency:** `{data['latency_seconds']:.4f} seconds`")
                         
-                        with st.expander(" View Context Blocks Matched by FAISS"):
+                        with st.expander("🔍 View Context Blocks Matched by FAISS"):
                             for idx, source_chunk in enumerate(data["sources"], 1):
                                 st.markdown(f"**Context Fragment [{idx}]:**")
                                 st.code(source_chunk, language="text")
@@ -59,9 +58,9 @@ with col_terminal:
 with col_telemetry:
     st.subheader("Operational Telemetry")
     
-    
     with st.expander(" Telemetry Simulation Controls"):
-        if st.button(" Populate Metrics Logs (Automate 20 Contractual Queries)"):
+        
+        if st.button(" Populate Metrics Logs (Automate 30 Contractual Queries)"):
             mock_queries = [
                 "What interest rate does AWS charge on late payments?",
                 "What happens if payment terms are violated?",
@@ -82,7 +81,17 @@ with col_telemetry:
                 "What is the weather forecast for tomorrow morning?",
                 "Can you recommend a recipe for preparing pasta?",
                 "Who founded FC Barcelona?",
-                "What is the current trading price of bitcoin?"
+                "What is the current trading price of bitcoin?",
+                "What are the definitions of AWS Intellectual Property?",
+                "Does AWS guarantee service availability under this agreement?",
+                "Are there taxes included in the listed service fees?",
+                "How are non-English contract variations handled?",
+                "What is the effective date of this customer agreement?",
+                "Can I assign this contract to a third party company?",
+                "What constitutes a material breach under Section 5?",
+                "How does AWS handle offline diagnostic hardware drives?",
+                "What is the notice period for modifying service terms?",
+                "Who won the cricket match yesterday afternoon?"
             ]
             
             bar = st.progress(0)
@@ -96,13 +105,12 @@ with col_telemetry:
                 except:
                     pass
                 bar.progress((index + 1) / total)
-                time.sleep(0.05)
+                time.sleep(0.02)
                 
-            st.success("Telemetry logs generated. Refreshing page.")
+            st.success("Telemetry log matrix compiled. Refreshing analytics panel.")
             time.sleep(0.5)
             st.rerun()
 
-    
     try:
         analytics_response = requests.get(f"{BACKEND_URL}/analytics")
         if analytics_response.status_code == 200:
