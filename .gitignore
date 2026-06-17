@@ -2,3 +2,6 @@
 .env
 # Local database files
 *.db
+# Python compiled bytecode directories
+__pycache__/
+*.pyc
