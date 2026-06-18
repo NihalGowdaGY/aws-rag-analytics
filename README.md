@@ -99,8 +99,7 @@ streamlit run app/frontend.py
 
 Dashboard opens automatically at `http://localhost:8501`.
 
-**First thing to do:** Click the **"Initialize Document Ingestion Pipeline"** button on the dashboard. This parses the PDF, generates embeddings, and builds the FAISS index in memory. You only need to do this once per server session.
-
+**First thing to do:** Click the **"Initialize Document Ingestion Pipeline"** button on the dashboard. This parses the PDF, generates embeddings, and persists the data assets to disk. Thanks to local file caching, these will auto-reload on subsequent startups without re-running ingestion.
 ---
 
 ## API endpoints
@@ -165,7 +164,7 @@ The telemetry panel (right side of the dashboard) shows:
 - **Mean pipeline latency** - average end-to-end response time in seconds
 - **Top query trends** - most frequently asked questions
 
-You can also use the **"Populate Metrics Logs"** button to auto-fire 20 test queries (a mix of on-topic contract questions and intentionally out-of-scope ones like weather and sports) to seed the analytics panel with realistic data.
+You can also use the **"Populate Metrics Logs"** button to auto-fire 30 test queries (a mix of on-topic contract questions and intentionally out-of-scope ones like weather and sports) to seed the analytics panel with realistic data.
 
 ---
 
