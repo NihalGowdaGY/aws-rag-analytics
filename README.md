@@ -99,8 +99,8 @@ streamlit run app/frontend.py
 
 Dashboard opens automatically at `http://localhost:8501`.
 
-**First thing to do:** 
-Click the **"Initialize Document Ingestion Pipeline"** button on the dashboard. This parses the PDF, generates embeddings, and persists the data assets to disk. Thanks to local file caching, these will auto-reload on subsequent startups without re-running ingestion.
+**First thing to do:** Click the **"Initialize Document Ingestion Pipeline"** button on the dashboard. This parses the PDF, generates embeddings, and persists the data assets to disk . Thanks to local file caching, these will auto reload on subsequent startups without rerunning ingestion.
+
 ---
 
 ## API endpoints
