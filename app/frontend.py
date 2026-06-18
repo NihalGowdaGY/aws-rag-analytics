@@ -3,7 +3,6 @@ import requests
 import time
 import os
 
-
 BACKEND_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8000")
 
 st.set_page_config(page_title="AWS Contract Audit Dashboard", layout="wide")
@@ -46,7 +45,7 @@ with col_terminal:
                         st.info(data["answer"])
                         st.markdown(f" **Pipeline Runtime Latency:** `{data['latency_seconds']:.4f} seconds`")
                         
-                        with st.expander("🔍 View Context Blocks Matched by FAISS"):
+                        with st.expander(" View Context Blocks Matched by FAISS"):
                             for idx, source_chunk in enumerate(data["sources"], 1):
                                 st.markdown(f"**Context Fragment [{idx}]:**")
                                 st.code(source_chunk, language="text")
@@ -59,7 +58,6 @@ with col_telemetry:
     st.subheader("Operational Telemetry")
     
     with st.expander(" Telemetry Simulation Controls"):
-        
         if st.button(" Populate Metrics Logs (Automate 30 Contractual Queries)"):
             mock_queries = [
                 "What interest rate does AWS charge on late payments?",
@@ -116,14 +114,18 @@ with col_telemetry:
         if analytics_response.status_code == 200:
             metrics = analytics_response.json()
             
-            st.metric("Total API Requests Logged", metrics["total_queries"])
-            st.metric("Out-of-Scope Fallbacks Triggered", metrics["unanswered_queries_count"])
-            st.metric("Mean Pipeline Latency", f"{metrics['average_latency_seconds']:.4f} sec")
             
-            if metrics["most_frequent_queries"]:
+            st.metric("Total API Requests Logged", metrics.get("total_queries", 0))
+            st.metric("Out-of-Scope Fallbacks Triggered", metrics.get("unanswered_queries_count", 0))
+            st.metric("Mean Pipeline Latency", f"{metrics.get('average_latency_seconds', 0.0):.4f} sec")
+            
+            trends = metrics.get("most_frequent_queries", [])
+            if trends:
                 st.markdown(" **Top System Query Trends:**")
-                for item in metrics["most_frequent_queries"]:
-                    st.caption(f"Hits: `{item['count']}` | *\"{item['query']}\"*")
+                for item in trends:
+                    st.caption(f"Hits: `{item.get('count', 0)}` | *\"{item.get('query', '')}\"*")
+            else:
+                st.caption("No log entries processed yet. Run queries to compile metrics trends.")
         else:
             st.caption("Unable to communicate with metrics server aggregation layout.")
     except Exception:

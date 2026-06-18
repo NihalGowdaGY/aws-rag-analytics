@@ -3,19 +3,23 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from src.database import get_db
+
+
+from src.database import get_db, engine, Base
 from src.models import QueryLog
 from src.schemas import QueryRequest, QueryResponse, AnalyticsSummary
 from src.rag_engine import LegalRAGProcessor
-
 
 rag_backend = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Safely initializes heavyweight neural architectures on server bootstrap lifespan windows."""
+    """Safely initializes database schemas and heavyweight architectures on server bootstrap."""
     global rag_backend
     try:
+       
+        Base.metadata.create_all(bind=engine)
+        
         
         rag_backend = LegalRAGProcessor()
     except Exception as e:
@@ -43,13 +47,26 @@ def ingest_document():
 @app.post("/ask", response_model=QueryResponse)
 def ask_question(payload: QueryRequest, db: Session = Depends(get_db)):
     """Executes search queries across document vector indices, records system telemetry, and logs outcomes."""
-    clean_query = payload.query.strip()
     
+    
+    if not rag_backend.is_loaded():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The RAG vector layer is offline. Please run the document ingestion pipeline first."
+        )
+
+    clean_query = payload.query.strip()
     start_time = time.perf_counter()
+    
     try:
         sources, generated_answer = rag_backend.execute_retrieval_query(clean_query)
     except Exception as err:
+        import traceback
+        print("\n--- ASK ENDPOINT CRASH TRACEBACK ---")
+        traceback.print_exc()
+        print("------------------------------------\n")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(err))
+        
     execution_latency = time.perf_counter() - start_time
 
     fallback_phrase = "I am sorry, but the provided documentation does not contain that information."

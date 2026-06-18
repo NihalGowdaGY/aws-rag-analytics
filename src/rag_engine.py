@@ -18,12 +18,14 @@ class LegalRAGProcessor:
         self.index = None
         
         
-        # Explicitly bind the storage targets to the project root directory
         self.index_file = os.path.join(os.getcwd(), "index.faiss")
         self.chunks_file = os.path.join(os.getcwd(), "chunks.txt")
         
-        
         self.load_persisted_index()
+
+    def is_loaded(self) -> bool:
+        """Helper verify check to let backend endpoints track index status safely."""
+        return self.index is not None and len(self.text_chunks) > 0
 
     def load_and_segment_document(self):
         """Parses target legal text inputs and extracts overlapping string windows."""
@@ -79,7 +81,7 @@ class LegalRAGProcessor:
     def execute_retrieval_query(self, user_query: str) -> tuple[list[str], str]:
         """Queries nearest neighbors from the index and builds the grounded prompt matrix."""
         if self.index is None or not self.text_chunks:
-            return [], "System vector index is offline. Please execute document ingestion first."
+            raise RuntimeError("System vector index is offline. Please execute document ingestion first.")
             
         query_vector = self.encoder.encode([user_query]).astype("float32")
         distances, indices = self.index.search(query_vector, settings.top_k_retrieval)
